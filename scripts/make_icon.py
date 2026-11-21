@@ -6,7 +6,8 @@ A few dark patches stand in for the maria.
 
 Writes:
   assets/icon.svg              favicon and in-page logo
-  assets/apple-touch-icon.png  180x180 home-screen icon (opaque background)
+  assets/apple-touch-icon.png  180x180 iOS home-screen icon
+  assets/icon-192.png, assets/icon-512.png, assets/icon-maskable-512.png  PWA icons
 Requires Pillow and NumPy.
 Usage: python3 scripts/make_icon.py
 """
@@ -99,13 +100,22 @@ def main():
     (ROOT / "assets" / "icon.svg").write_text(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}">{polys}</svg>\n', encoding="utf-8")
 
-    big = 180 * 4
-    img = Image.new("RGB", (big, big), BG)
-    d = ImageDraw.Draw(img)
-    s2, c2 = big * 0.4, big / 2
-    for t, col in shaded:
-        d.polygon([(c2 + p[0] * s2, c2 + p[1] * s2) for p in t], fill=col, outline=col)
-    img.resize((180, 180), Image.LANCZOS).save(ROOT / "assets" / "apple-touch-icon.png", optimize=True)
+    def raster(size, moon_frac):
+        """Opaque square icon: the Moon fills moon_frac of the width, on the page background."""
+        big = size * 4
+        img = Image.new("RGB", (big, big), BG)
+        d = ImageDraw.Draw(img)
+        s2, c2 = big * moon_frac / 2, big / 2
+        for t, col in shaded:
+            d.polygon([(c2 + p[0] * s2, c2 + p[1] * s2) for p in t], fill=col, outline=col)
+        return img.resize((size, size), Image.LANCZOS)
+
+    out = ROOT / "assets"
+    raster(180, 0.8).save(out / "apple-touch-icon.png", optimize=True)
+    raster(192, 0.8).save(out / "icon-192.png", optimize=True)
+    raster(512, 0.8).save(out / "icon-512.png", optimize=True)
+    # Maskable icons can be cropped to a circle; keep the Moon inside the central 80% safe zone.
+    raster(512, 0.62).save(out / "icon-maskable-512.png", optimize=True)
     print(f"{len(tris)} triangles")
 
 

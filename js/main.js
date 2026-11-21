@@ -2,7 +2,7 @@
 import { Globe } from "./globe.js";
 import { t, L, nf, fmtDate, lang, setLang, applyStatic } from "./i18n.js";
 import { distKm, fmtLL, fmtKm, scoreFor, MAX_SCORE } from "./geo.js";
-import { MODES, MODE_ORDER, ROUNDS, MARIA, NAMED_PLACES, randomRound, todayKey } from "./modes.js";
+import { MODES, MODE_ORDER, ROUNDS, MARIA, NAMED_PLACES, randomRound, offlineRound, todayKey } from "./modes.js";
 import { drawShareCard } from "./share.js";
 
 const $ = id => document.getElementById(id);
@@ -110,7 +110,10 @@ photo.addEventListener("error", () => {
   $("photoStatus").innerHTML = `<span>${t("loadFailed")}</span>
     <span class="row"><button class="ghost" id="retryBtn">${t("retry")}</button><button class="ghost" id="skipBtn">${t("skip")}</button></span>`;
   $("retryBtn").onclick = loadPhoto;
-  $("skipBtn").onclick = () => { state.rounds[state.round] = randomRound(); startRound(); };
+  $("skipBtn").onclick = () => {
+    state.rounds[state.round] = navigator.onLine ? randomRound() : offlineRound(state.rounds);
+    startRound();
+  };
 });
 
 function renderPhotoMeta() {
@@ -281,6 +284,20 @@ function renderLang() {
 }
 $("langBtn").onclick = () => { setLang(lang === "ja" ? "en" : "ja"); renderLang(); };
 document.querySelectorAll("[data-lang]").forEach(b => (b.onclick = () => { setLang(b.dataset.lang); renderLang(); }));
+
+// ---------- PWA ----------
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+let installPrompt = null;
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; $("installBtn").hidden = false; });
+addEventListener("appinstalled", () => { installPrompt = null; $("installBtn").hidden = true; });
+$("installBtn").onclick = async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice.catch(() => {});
+  installPrompt = null; $("installBtn").hidden = true;
+};
 
 setLang(lang);
 renderLang();

@@ -118,6 +118,7 @@ main { display: grid; grid-template-columns: minmax(280px, 40%) 1fr; gap: 12px; 
 .mode-date { font-family: var(--f-mono); font-size: 12px; font-weight: 500; color: var(--earthshine); }
 .mode-meta { font-family: var(--f-mono); font-size: 11px; color: var(--dust); }
 .mode-meta.played { color: var(--target); }
+#installBtn { justify-self: start; }
 .toggle { display: flex; gap: 10px; align-items: baseline; cursor: pointer; }
 .toggle input { accent-color: var(--earthshine); }
 .credit { margin: 0; font-size: 11px; color: var(--dust); line-height: 1.6; }

@@ -28,6 +28,14 @@ An optional 60-second timer can be turned on from the menu. When time runs out, 
 
 `score = 5000 × exp(−distance / tolerance)`, where `tolerance = 0.8 × photo width + 150 km`. A guess within 4% of the photo width gets the full 5,000. The tolerance grows with the photo width, so a wide photo of a huge basin and a tight photo of a small crater are about equally hard to max out.
 
+## Install as an app (PWA)
+
+LunaGuessr is a Progressive Web App. On Android and desktop Chrome or Edge, use the **Install as an app** button on the menu (or the install icon in the address bar). On iPhone and iPad, open it in Safari and choose **Share → Add to Home Screen**.
+
+After the first visit the game starts offline. The daily challenge's built-in questions work offline; random spots and the zoom-in detail need a connection because they load live from USGS. When a live image cannot load offline, **Skip this spot** swaps in a built-in question.
+
+The service worker (`sw.js`) fetches code from the network first, so players get updates on their next visit. Images are cached under their file names: if you regenerate an image without renaming it, bump `VERSION` in `sw.js`.
+
 ## Run locally
 
 There is no build step, but opening `index.html` directly from disk will not work. Browsers block ES modules and the globe textures for pages loaded from `file://`. Start a local server instead:
@@ -46,6 +54,8 @@ In the repository, go to **Settings → Pages**. Set **Source** to "Deploy from 
 
 ```
 index.html            page markup
+manifest.webmanifest  PWA manifest
+sw.js                 service worker (offline support)
 css/style.css         styles
 js/main.js            game flow and UI
 js/globe.js           3D Moon: textures, relief, picking, markers, zoom-in detail (Three.js 0.170)

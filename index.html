@@ -16,6 +16,11 @@
 <meta name="theme-color" content="#07090d">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LunaGuessr">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
 <link rel="stylesheet" href="css/style.css">
@@ -85,6 +90,7 @@
     <h2 data-i18n="chooseMode"></h2>
     <div class="modes" id="modeList"></div>
     <label class="toggle"><input type="checkbox" id="timerToggle"> <span><b data-i18n="timer"></b> <span class="note" data-i18n="timerNote"></span></span></label>
+    <button class="ghost" id="installBtn" hidden data-i18n="install"></button>
     <p class="credit" data-i18n="credit"></p>
   </div>
 </div>

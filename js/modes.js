@@ -19,6 +19,13 @@ export function randomRound(rand = Math.random) {
   return { kind: "random", lat: p.lat, lon: p.lon, km, wideKm, img: wmsCrop(p.lat, p.lon, km), wide: wmsCrop(p.lat, p.lon, wideKm) };
 }
 
+/** A built-in question not already in this game, used to replace a live image that failed to load while offline. */
+export function offlineRound(rounds) {
+  const used = new Set(rounds.map(r => r.id));
+  const pool = QUESTIONS.filter(q => !used.has(q.id));
+  return fromQuestion(pool[Math.floor(Math.random() * pool.length)]);
+}
+
 const pick = (set, n, rand) => shuffle(QUESTIONS.filter(q => q.sets.includes(set)), rand).slice(0, n);
 
 /**
