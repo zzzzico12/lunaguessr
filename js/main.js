@@ -1,8 +1,9 @@
 // Game flow and UI.
 import { Globe } from "./globe.js";
-import { t, L, nf, lang, setLang, applyStatic } from "./i18n.js";
+import { t, L, nf, fmtDate, lang, setLang, applyStatic } from "./i18n.js";
 import { distKm, fmtLL, fmtKm, scoreFor, MAX_SCORE } from "./geo.js";
-import { MODES, MODE_ORDER, ROUNDS, MARIA, NAMED_PLACES, randomRound, todayKey, dailyNumber } from "./modes.js";
+import { MODES, MODE_ORDER, ROUNDS, MARIA, NAMED_PLACES, randomRound, todayKey } from "./modes.js";
+import { drawShareCard } from "./share.js";
 
 const $ = id => document.getElementById(id);
 const ROUND_SECONDS = 60;
@@ -37,11 +38,8 @@ $("resetBtn").onclick = () => globe.reset();
 function renderMenu() {
   $("modeList").innerHTML = MODE_ORDER.map(id => {
     const daily = id === "daily" ? store.get("daily:" + todayKey()) : null;
-    const badge = id === "daily"
-      ? `<span class="badge">${t("dailyNumber", { n: dailyNumber() })}</span>`
-      : "";
     return `<button class="mode mode-${id}" data-mode="${id}">
-      <span class="mode-title">${t("mode." + id)} ${badge}</span>
+      <span class="mode-title">${t("mode." + id)}${id === "daily" ? ` <span class="mode-date">${fmtDate(todayKey(), "short")}</span>` : ""}</span>
       <span class="mode-desc">${t("mode." + id + ".desc")}</span>
       ${daily ? `<span class="mode-meta played">${t("dailyPlayed", { score: nf(daily.total) })}</span>` : ""}
       ${MODES[id].online && id === "anywhere" ? `<span class="mode-meta">${t("needsNet")}</span>` : ""}
@@ -65,10 +63,11 @@ function showMenu() {
 // ---------- game ----------
 function startGame(mode) {
   if (mode === "daily") {
-    const done = store.get("daily:" + todayKey());
-    if (done) { Object.assign(state, { mode, total: done.total, log: done.log, phase: "final" }); $("menu").hidden = true; renderFinal(); return; }
+    const key = todayKey(), done = store.get("daily:" + key);
+    if (done) { Object.assign(state, { mode, dailyKey: key, total: done.total, log: done.log, phase: "final" }); $("menu").hidden = true; renderFinal(); return; }
+    state.dailyKey = key; // fixed at the start, so a game that runs past midnight stays on its own date
   }
-  Object.assign(state, { mode, rounds: MODES[mode].build(), round: 0, total: 0, log: [] });
+  Object.assign(state, { mode, rounds: MODES[mode].build(state.dailyKey), round: 0, total: 0, log: [] });
   $("menu").hidden = true; $("final").hidden = true;
   globe.reset();
   startRound();
@@ -200,7 +199,7 @@ function next() {
 function finish() {
   state.phase = "final";
   if (state.mode === "daily") {
-    store.set("daily:" + todayKey(), {
+    store.set("daily:" + state.dailyKey, {
       total: state.total,
       log: state.log.map(e => ({ pts: e.pts, d: e.d, hint: e.hint, round: { name: e.round.name ?? null } })),
     });
@@ -209,22 +208,22 @@ function finish() {
 }
 
 const rankFor = total => t("rank." + (total >= 22000 ? 4 : total >= 16000 ? 3 : total >= 9000 ? 2 : 1));
-const squares = log => log.map(e => (e.pts >= 4000 ? "🟩" : e.pts >= 2500 ? "🟨" : e.pts >= 1000 ? "🟧" : "🟥")).join("");
+const modeTitle = () => t("mode." + state.mode) + (state.mode === "daily" ? ` · ${fmtDate(state.dailyKey)}` : "");
+const siteUrl = () => `${location.origin}${location.pathname}`;
 function shareText() {
-  const title = state.mode === "daily"
-    ? `LunaGuessr ${t("mode.daily")} #${dailyNumber()} 🌕`
-    : `LunaGuessr · ${t("mode." + state.mode)} 🌕`;
-  return `${title}\n${nf(state.total)} / ${nf(MAX_SCORE * ROUNDS)}\n${squares(state.log)}\n${location.origin}${location.pathname}`;
+  return `LunaGuessr · ${modeTitle()}\n${nf(state.total)} / ${nf(MAX_SCORE * ROUNDS)}\n${siteUrl()}`;
 }
 
 function renderFinal() {
   stopTimer();
   $("finalTotal").innerHTML = `${nf(state.total)} <small>/ ${nf(MAX_SCORE * ROUNDS)}</small>`;
-  $("finalMode").textContent = t("mode." + state.mode) + (state.mode === "daily" ? ` #${dailyNumber()}` : "");
+  $("finalMode").textContent = modeTitle();
   $("finalRank").innerHTML = `${t("rank")}: <span class="rank">${rankFor(state.total)}</span>`;
-  $("finalTable").innerHTML = state.log.map((e, i) => `<tr>
+  $("shareNote").textContent = "";
+  $("finalTable").innerHTML = `<thead><tr><th>${t("colPlace")}</th><th class="n">${t("colDist")}</th><th class="s">${t("colScore")}</th></tr></thead><tbody>` +
+    state.log.map((e, i) => `<tr>
     <td>${i + 1}. ${e.round.name ? L(e.round.name) : t("randomSpot")}${e.hint ? ` <span class="note">(${t("wideTag")})</span>` : ""}</td>
-    <td class="n">${e.d == null ? "–" : fmtKm(e.d)}</td><td class="s">${nf(e.pts)}</td></tr>`).join("");
+    <td class="n">${e.d == null ? "–" : fmtKm(e.d)}</td><td class="s">${nf(e.pts)}</td></tr>`).join("") + "</tbody>";
   $("shareText").textContent = shareText();
   $("againBtn").hidden = state.mode === "daily";
   $("final").hidden = false;
@@ -237,6 +236,27 @@ $("shareBtn").onclick = async () => {
     getSelection().removeAllRanges(); getSelection().addRange(range);
     $("shareNote").textContent = t("copyFailed");
   }
+};
+$("imageBtn").onclick = async () => {
+  $("imageBtn").disabled = true;
+  try {
+    const blob = await drawShareCard({
+      title: modeTitle(), total: nf(state.total), max: nf(MAX_SCORE * ROUNDS), rank: `${t("rank")}: ${rankFor(state.total)}`,
+      roundsHeading: t("roundScores"),
+      rounds: state.log.map((e, i) => ({ pts: e.pts, label: t("roundN", { n: i + 1 }), score: nf(e.pts) })), url: siteUrl().replace(/^https?:\/\//, ""),
+    });
+    const file = new File([blob], `lunaguessr-${state.mode === "daily" ? state.dailyKey : state.mode}.png`, { type: "image/png" });
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], text: shareText() });
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      $("shareNote").textContent = t("imageSaved");
+    }
+  } catch (err) {
+    if (err?.name !== "AbortError") $("shareNote").textContent = t("imageFailed");
+  } finally { $("imageBtn").disabled = false; }
 };
 $("againBtn").onclick = () => startGame(state.mode);
 $("finalMenuBtn").onclick = showMenu;
@@ -251,6 +271,7 @@ document.addEventListener("keydown", e => {
 function renderLang() {
   applyStatic();
   $("langBtn").textContent = lang === "ja" ? "English" : "日本語";
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
   $("readout").textContent = t("hover");
   renderHud();
   if (state.phase === "menu") renderMenu();
@@ -259,6 +280,7 @@ function renderLang() {
   if (state.showMares) globe.setMareLabels(mareLabels(), true);
 }
 $("langBtn").onclick = () => { setLang(lang === "ja" ? "en" : "ja"); renderLang(); };
+document.querySelectorAll("[data-lang]").forEach(b => (b.onclick = () => { setLang(b.dataset.lang); renderLang(); }));
 
 setLang(lang);
 renderLang();

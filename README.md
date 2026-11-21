@@ -9,7 +9,7 @@ English and Japanese are supported. The language follows the browser and can be 
 1. Pick a mode. A mystery photo appears on the left. North is up, and a scale bar shows the size in km.
 2. Drag the 3D Moon on the right to rotate it, and scroll or pinch to zoom. When you zoom in close, a sharper image of the area loads automatically.
 3. Click where you think the center of the photo is, then press **Guess here** (or Enter).
-4. You score up to 5,000 points per round. After 5 rounds you get a total, a rank and a result you can copy and share.
+4. You score up to 5,000 points per round. After 5 rounds you get a total, a rank, and a result you can share as text or as an image.
 
 **Wide view** switches to a photo of an area about 3 times wider. Using it multiplies that round's score by 0.6.
 
@@ -17,11 +17,10 @@ English and Japanese are supported. The language follows the browser and can be 
 
 | Mode | Questions |
 |---|---|
-| Daily Challenge | 5 spots that change every day at 00:00 UTC, the same for every player. Mixes the other modes. Playable once per day. |
-| Near Side Classics | 28 famous craters, maria and valleys visible from Earth |
-| Far Side | 14 features on the hemisphere that never faces Earth |
-| Landing Sites | 15 sites: Apollo 11–17, Luna, Surveyor, Chang'e, Chandrayaan-3, SLIM, Blue Ghost |
+| Daily Challenge | 5 spots that change at midnight in your own time zone. Everyone on the same calendar date gets the same spots, so results with the same date can be compared. Playable once per day. Each day mixes 2 famous near-side features, 1 far-side feature, 1 landing site and 1 random spot. |
 | Anywhere | Random spots across the whole Moon (up to 70° latitude), loaded live from USGS. Unlimited. |
+
+The daily challenge draws from 28 near-side features, 14 far-side features and 15 landing sites (Apollo 11–17, Luna, Surveyor, Chang'e, Chandrayaan-3, SLIM, Blue Ghost). Near Side, Far Side and Landing Sites also exist as separate modes in `js/modes.js`; add them to `MODE_ORDER` to show them on the menu.
 
 An optional 60-second timer can be turned on from the menu. When time runs out, the current guess is submitted, or the round scores 0 if there is none.
 
@@ -58,6 +57,9 @@ assets/moon_8k.jpg    globe texture (4k version used on GPUs that cannot load 8k
 assets/elevation.png  LOLA elevation used for the relief
 assets/questions/     question photos and wide-view photos
 scripts/generate.py   downloads the images and writes the question data
+scripts/make_icon.py  draws the low-poly Moon icon (assets/icon.svg, assets/apple-touch-icon.png)
+scripts/make_art.py   renders the full-Moon artwork (assets/moon_disk.jpg, assets/og-image.png)
+js/share.js           the share image
 ```
 
 ## Add questions

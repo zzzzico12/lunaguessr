@@ -14,7 +14,8 @@ const STRINGS = {
     "mode.anywhere": "Anywhere", "mode.anywhere.desc": "Random spots across the whole Moon. Endless and very hard.",
     needsNet: "Loads images live from USGS",
     dailyPlayed: "Played today: {score}",
-    dailyNumber: "#{n}",
+    colPlace: "Location", colDist: "Distance to answer", colScore: "Score",
+    roundScores: "Score per round (max 5,000)", roundN: "Round {n}",
     photoLabel: "LRO WAC orbital image",
     photoMeta: "{km} km wide · north up",
     wideView: "Wide view (score ×0.6)", wideUsed: "Wide view used (score ×0.6)",
@@ -39,6 +40,7 @@ const STRINGS = {
     "rank.4": "Lunar Surveyor", "rank.3": "Orbiting Astronaut", "rank.2": "Amateur Lunar Observer", "rank.1": "Earthbound Stargazer",
     playAgain: "Play again", backToMenu: "Back to menu",
     share: "Copy result", copied: "Copied", copyFailed: "Select the text above and copy it.",
+    saveImage: "Share image", imageSaved: "Image saved", imageFailed: "Could not create the image.",
     wideTag: "wide view",
     randomSpot: "Unnamed spot",
     credit: "Imagery: NASA / GSFC / Arizona State University (LRO WAC global mosaic), served by USGS Astrogeology. Elevation: NASA LOLA via NASA SVS. LunaGuessr is a fan project and is not affiliated with or endorsed by NASA.",
@@ -57,7 +59,8 @@ const STRINGS = {
     "mode.anywhere": "どこでも", "mode.anywhere.desc": "月全体のランダムな地点。無限に遊べる最難関。",
     needsNet: "USGSから画像をその場で読み込みます",
     dailyPlayed: "今日のスコア：{score}",
-    dailyNumber: "#{n}",
+    colPlace: "地点", colDist: "正解までの距離", colScore: "得点",
+    roundScores: "ラウンドごとの得点（各5,000点満点）", roundN: "第{n}問",
     photoLabel: "LRO WAC 軌道写真",
     photoMeta: "幅 {km} km ・ 北が上",
     wideView: "広域で見る（得点 ×0.6）", wideUsed: "広域ヒント使用済み（得点 ×0.6）",
@@ -82,6 +85,7 @@ const STRINGS = {
     "rank.4": "月面測量士", "rank.3": "月周回飛行士", "rank.2": "アマチュア月面観測家", "rank.1": "地上からの見物客",
     playAgain: "もう一度", backToMenu: "メニューに戻る",
     share: "結果をコピー", copied: "コピーしました", copyFailed: "上のテキストを選択してコピーしてください。",
+    saveImage: "画像でシェア", imageSaved: "画像を保存しました", imageFailed: "画像を作成できませんでした。",
     wideTag: "広域",
     randomSpot: "名前のない地点",
     credit: "画像：NASA / GSFC / アリゾナ州立大学（LRO WAC 全球モザイク、USGS Astrogeology 配信）。標高：NASA LOLA（NASA SVS 経由）。LunaGuessr はファンによる非公式プロジェクトで、NASA とは関係がなく、NASA の承認も受けていません。",
@@ -113,6 +117,13 @@ export function t(key, vars = {}) {
 export const L = obj => (obj && typeof obj === "object" ? obj[lang] ?? obj.en : obj);
 
 export const nf = n => n.toLocaleString(lang === "ja" ? "ja-JP" : "en-US");
+
+/** Format a "YYYY-MM-DD" key: long = "2026年11月21日" / "Nov 21, 2026", short = "11月21日" / "Nov 21". */
+export function fmtDate(key, style = "long") {
+  const [y, m, d] = key.split("-").map(Number);
+  const opts = style === "short" ? { month: "short", day: "numeric" } : { year: "numeric", month: "short", day: "numeric" };
+  return new Intl.DateTimeFormat(lang === "ja" ? "ja-JP" : "en-US", opts).format(new Date(y, m - 1, d));
+}
 
 /** Fill every [data-i18n] element with its string. */
 export function applyStatic(root = document) {

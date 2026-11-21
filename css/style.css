@@ -94,26 +94,30 @@ main { display: grid; grid-template-columns: minmax(280px, 40%) 1fr; gap: 12px; 
 .legend .g { color: var(--flag); } .legend .t { color: var(--target); }
 
 /* overlays */
-.overlay { position: fixed; inset: 0; background: #07090de8; display: grid; place-items: center; z-index: 5; overflow: auto;
+.overlay { position: fixed; inset: 0; background: var(--void); display: grid; place-items: center; z-index: 5; overflow: auto;
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .card { width: min(600px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; }
 .card h2 { margin: 0; font-family: var(--f-mono); font-size: 11px; color: var(--dust); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
 
 .brand { display: flex; gap: 16px; align-items: center; }
-.moonmark { width: 56px; height: 56px; flex: none; border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #3a3f48 0 9%, transparent 10%), radial-gradient(circle at 62% 64%, #3a3f48 0 13%, transparent 14%),
-              radial-gradient(circle at 40% 38%, #d8dbe1, #8e939d 70%, #5b606a); box-shadow: inset -10px -6px 16px #0009; }
+.moonmark { width: 64px; height: 64px; flex: none; }
+.hicon { width: 24px; height: 24px; vertical-align: -4px; margin-right: 8px; }
+.card.menu { position: relative; }
+.langSwitch { justify-self: end; display: inline-flex; border: 1px solid var(--line); border-radius: 7px; padding: 2px; gap: 2px; }
+.seg { background: transparent; border: 0; color: var(--dust); padding: 5px 12px; border-radius: 5px; font-size: 12px; }
+.seg:hover { color: var(--regolith); }
+.seg[aria-pressed="true"] { background: var(--raised); color: var(--earthshine); }
 .logo { font-family: var(--f-display); font-size: 34px; font-weight: 600; line-height: 1; }
 .tagline { margin: 6px 0 0; color: var(--dust); }
 .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mode { text-align: left; background: var(--raised); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; color: var(--regolith); display: grid; gap: 4px; align-content: start; }
 .mode:hover { border-color: var(--earthshine); }
-.mode-daily { grid-column: 1 / -1; border-color: color-mix(in srgb, var(--earthshine) 50%, var(--line)); }
+.mode-daily { border-color: color-mix(in srgb, var(--earthshine) 50%, var(--line)); }
 .mode-title { font-family: var(--f-display); font-size: 16px; font-weight: 600; display: flex; gap: 8px; align-items: center; }
 .mode-desc { color: var(--dust); font-size: 13px; line-height: 1.5; }
+.mode-date { font-family: var(--f-mono); font-size: 12px; font-weight: 500; color: var(--earthshine); }
 .mode-meta { font-family: var(--f-mono); font-size: 11px; color: var(--dust); }
 .mode-meta.played { color: var(--target); }
-.badge { font-family: var(--f-mono); font-size: 11px; font-weight: 500; color: var(--earthshine); border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; }
 .toggle { display: flex; gap: 10px; align-items: baseline; cursor: pointer; }
 .toggle input { accent-color: var(--earthshine); }
 .credit { margin: 0; font-size: 11px; color: var(--dust); line-height: 1.6; }
@@ -123,18 +127,62 @@ main { display: grid; grid-template-columns: minmax(280px, 40%) 1fr; gap: 12px; 
 .total small { font-size: 16px; color: var(--dust); }
 .rank { color: var(--earthshine); font-weight: 600; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-td { padding: 7px 4px; border-top: 1px solid var(--line); }
-td.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--dust); white-space: nowrap; }
-td.s { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+th { padding: 0 4px 6px; text-align: left; font-family: var(--f-mono); font-size: 11px; font-weight: 500; color: var(--dust); letter-spacing: .06em; text-transform: uppercase; }
+td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: baseline; }
+th.n, th.s, td.n, td.s { text-align: right; white-space: nowrap; }
+td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--dust); }
+td.s { font-family: var(--f-display); font-size: 18px; font-weight: 600; color: var(--earthshine); font-variant-numeric: tabular-nums; }
 .share { margin: 0; padding: 12px; background: var(--void); border: 1px solid var(--line); border-radius: 6px; font-family: var(--f-mono); font-size: 13px; white-space: pre-wrap; word-break: break-all; user-select: all; }
 
-@media (max-width: 760px) {
-  body { overflow: auto; height: auto; min-height: 100%; }
-  main { grid-template-columns: 1fr; grid-template-rows: auto minmax(440px, 64vh); }
-  .photoFrame { height: auto; width: min(100%, 42vh); }
-  .readout { right: 12px; top: 44px; }
-  .detailNote { top: 62px; }
-  .modes { grid-template-columns: 1fr; }
-  .hbtns { margin-left: 0; }
-}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Moon backdrop on the menu and result screens */
+#menu, #final {
+  background:
+    radial-gradient(ellipse at 30% 50%, var(--void) 30%, transparent 75%),
+    url("../assets/moon_disk.jpg") no-repeat right -18vmin bottom -22vmin / min(95vmin, 1100px),
+    var(--void);
+}
+.card { background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(8px); position: relative; }
+
+/* ---------- phones: one screen, photo on top, globe fills the rest ---------- */
+@media (max-width: 760px) {
+  body { height: 100%; height: 100dvh; gap: 8px; padding-block: 8px; }
+  header { gap: 6px 12px; }
+  h1 { font-size: 18px; }
+  .hicon { width: 20px; height: 20px; margin-right: 6px; }
+  .hbtns { margin-left: auto; }
+  .hud { order: 3; width: 100%; justify-content: space-between; gap: 8px; }
+  .hud-mode { display: none; }
+  main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 8px; }
+  .plabel { padding: 6px 10px; font-size: 10px; }
+  .photoWrap { padding: 6px; }
+  .photoFrame { height: min(30dvh, 92vw); width: auto; }
+  .photoActions { padding: 6px 10px; gap: 6px 10px; }
+  .photoActions .ghost { padding: 6px 10px; font-size: 12px; }
+  .readout { top: 44px; right: 12px; font-size: 11px; }
+  .detailNote { top: 60px; }
+  .gtools { left: 8px; right: 8px; justify-content: flex-end; }
+  .dock { left: 8px; right: 8px; bottom: 8px; }
+  .dock .primary { width: 100%; padding: 12px 16px; }
+  .result { padding: 10px 12px; gap: 4px 12px; max-height: calc(100% - 52px); overflow: auto; }
+  .result h2 { font-size: 16px; }
+  .pts { font-size: 22px; }
+  .result p { font-size: 12px; line-height: 1.5; }
+  .result .primary { width: 100%; }
+  .overlay { place-items: start center; }
+  .card { padding: 18px 16px; gap: 12px; }
+  .logo { font-size: 28px; }
+  .moonmark { width: 48px; height: 48px; }
+  .modes { grid-template-columns: 1fr; }
+  .mode { padding: 10px 12px; }
+  .total { font-size: 40px; }
+  td.s { font-size: 16px; }
+  th.n, td.n { white-space: normal; }
+  #menu, #final { background-position: center, right -30vmin bottom -20vmin, 0 0; background-size: auto, 110vmin, auto; }
+}
+/* Bigger tap targets on touch screens */
+@media (pointer: coarse) {
+  .ghost, .seg { min-height: 36px; }
+  .primary { min-height: 44px; }
+}

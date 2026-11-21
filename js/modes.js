@@ -4,7 +4,6 @@ import { rng, hashStr, shuffle, randomPoint, wmsCrop } from "./geo.js";
 
 export const ROUNDS = 5;
 const WIDE_FACTOR = 3.2;
-const LAUNCH_DAY = Date.UTC(2026, 10, 21); // Daily #1
 
 const fromQuestion = q => ({
   kind: "feature", id: q.id, lat: q.lat, lon: q.lon, km: q.km,
@@ -22,18 +21,20 @@ export function randomRound(rand = Math.random) {
 
 const pick = (set, n, rand) => shuffle(QUESTIONS.filter(q => q.sets.includes(set)), rand).slice(0, n);
 
-/** UTC date key, e.g. "2026-11-22". The daily puzzle changes at 00:00 UTC. */
-export function todayKey(now = new Date()) { return now.toISOString().slice(0, 10); }
-export function dailyNumber(now = new Date()) {
-  const d = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  return Math.floor((d - LAUNCH_DAY) / 864e5) + 1;
+/**
+ * Date key in the player's own time zone, e.g. "2026-11-21".
+ * Like Wordle, the puzzle changes at local midnight, and everyone on the same calendar date gets the same five spots.
+ */
+export function todayKey(now = new Date()) {
+  const p = n => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
 }
 
 export const MODES = {
   daily: {
     online: true,
-    build() {
-      const rand = rng(hashStr("lunaguessr-" + todayKey()));
+    build(key = todayKey()) {
+      const rand = rng(hashStr("lunaguessr-" + key));
       const near = pick("near", 2, rand), far = pick("far", 1, rand);
       const used = new Set([...near, ...far].map(q => q.id));
       const landing = shuffle(QUESTIONS.filter(q => q.sets.includes("landing") && !used.has(q.id)), rand).slice(0, 1);
@@ -47,7 +48,8 @@ export const MODES = {
   landing: { build: () => pick("landing", ROUNDS).map(fromQuestion) },
   anywhere: { online: true, build: () => Array.from({ length: ROUNDS }, () => randomRound(Math.random)) },
 };
-export const MODE_ORDER = ["daily", "near", "far", "landing", "anywhere"];
+// Modes shown on the menu. near / far / landing still feed the daily challenge and can be added back here.
+export const MODE_ORDER = ["daily", "anywhere"];
 
 /** Named places for the "nearest named feature" line after a random round. */
 export const MARIA = [
