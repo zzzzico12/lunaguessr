@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LunaGuessr</title>
+<meta name="description" content="Find where on the Moon a real orbital photo was taken. A GeoGuessr-style game with LRO imagery on a 3D Moon.">
+<meta property="og:title" content="LunaGuessr">
+<meta property="og:description" content="Find where on the Moon a real orbital photo was taken.">
+<meta name="theme-color" content="#07090d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23c9ccd3'/%3E%3Ccircle cx='11' cy='12' r='3' fill='%23969aa4'/%3E%3Ccircle cx='20' cy='19' r='4' fill='%23969aa4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header>
+  <h1>Luna<span>Guessr</span></h1>
+  <div class="hud">
+    <div><span data-i18n="mode">MODE</span> <b id="hudMode">–</b></div>
+    <div><span data-i18n="round">ROUND</span> <b id="hudRound">1 / 5</b></div>
+    <div><span data-i18n="score">SCORE</span> <b id="hudScore">0</b></div>
+    <div id="hudTimerWrap" hidden><span data-i18n="time">TIME</span> <b id="hudTimer">60s</b></div>
+  </div>
+  <div class="hbtns">
+    <button class="ghost small" id="langBtn">日本語</button>
+    <button class="ghost small" id="menuBtn" data-i18n="menu">Menu</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel" id="photoPanel" aria-label="Mystery photo">
+    <div class="plabel"><span data-i18n="photoLabel">LRO WAC orbital image</span><span id="photoMeta"></span></div>
+    <div class="photoWrap">
+      <div class="photoFrame">
+        <img id="photo" alt="Orbital photo of an unknown spot on the Moon">
+        <div class="compass" aria-hidden="true">N<br>▲</div>
+        <div class="scalebar"><i id="sbar"></i><span id="sbarLabel"></span></div>
+        <div class="photoStatus" id="photoStatus" hidden></div>
+      </div>
+    </div>
+    <div class="photoActions">
+      <button class="ghost" id="hintBtn" aria-pressed="false"></button>
+      <span class="note" id="hintNote"></span>
+    </div>
+  </section>
+
+  <section class="panel" id="globePanel" aria-label="Moon globe">
+    <div class="readout" id="readout"></div>
+    <div class="detailNote" id="detailNote" hidden data-i18n="detail"></div>
+    <div class="gtools">
+      <button class="ghost small" id="labelBtn" aria-pressed="false" data-i18n="mareNames"></button>
+      <button class="ghost small" id="resetBtn" data-i18n="resetView"></button>
+    </div>
+    <div class="dock" id="dock"></div>
+  </section>
+</main>
+
+<div class="overlay" id="menu">
+  <div class="card menu">
+    <div class="brand">
+      <div class="moonmark" aria-hidden="true"></div>
+      <div>
+        <div class="logo">Luna<span>Guessr</span></div>
+        <p class="tagline" data-i18n="tagline"></p>
+      </div>
+    </div>
+    <h2 data-i18n="chooseMode"></h2>
+    <div class="modes" id="modeList"></div>
+    <label class="toggle"><input type="checkbox" id="timerToggle"> <span><b data-i18n="timer"></b> <span class="note" data-i18n="timerNote"></span></span></label>
+    <p class="credit" data-i18n="credit"></p>
+  </div>
+</div>
+
+<div class="overlay" id="final" hidden>
+  <div class="card">
+    <h2 data-i18n="report"></h2>
+    <div class="finalMode" id="finalMode"></div>
+    <div class="total" id="finalTotal"></div>
+    <div id="finalRank"></div>
+    <table id="finalTable"></table>
+    <pre class="share" id="shareText"></pre>
+    <div class="row">
+      <button class="primary" id="shareBtn" data-i18n="share"></button>
+      <span class="note" id="shareNote" role="status"></span>
+    </div>
+    <div class="row">
+      <button class="ghost" id="againBtn" data-i18n="playAgain"></button>
+      <button class="ghost" id="finalMenuBtn" data-i18n="backToMenu"></button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
